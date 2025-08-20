@@ -1,0 +1,21 @@
+class sv:
+    def __init__(self,masv,tensv,ngaysinh):
+        self.masv=masv
+        self.tensv=tensv
+        self.ngaysinh=ngaysinh
+class lophoc(sv):
+    def __init__(self,tenlop,masv,tensv,ngaysinh,diem):
+        super().__init__(masv,tensv,ngaysinh)
+        self.tenlop=tenlop
+        self.dssv={}
+        self.diem=diem
+    def kq(self):
+        self.dssv.update({"ma":self.masv})
+        self.dssv.update({"ten": self.tensv})
+        self.dssv.update({"diem": self.diem})
+        self.dssv.values()
+        print(self.dssv)
+obj=lophoc("12A3","sv001","minh","20/11/2007",8)
+obj1=lophoc("12A3","sv002","binh","20/07/2002",10)
+obj.kq()
+obj1.kq()
