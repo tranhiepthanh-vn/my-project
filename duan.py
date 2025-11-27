@@ -5,7 +5,7 @@ from plyer import notification
 import os
 import pandas as pd
 
-khoa_api = "AIzaSyC8MBSm2nM7PF2afxzoXH3SwHtxHy_IdOE"
+khoa_api = " "
 
 # nói
 
@@ -145,4 +145,5 @@ while True:
             noi("Đang in lịch trình")
             hienthi()
         else:
+
             noi("Xin lỗi,tôi không có chức năng này")           
