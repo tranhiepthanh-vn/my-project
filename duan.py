@@ -5,7 +5,7 @@ from plyer import notification
 import os
 import pandas as pd
 
-khoa_api = " "
+khoa_api = ""
 
 # nói
 
@@ -147,3 +147,4 @@ while True:
         else:
 
             noi("Xin lỗi,tôi không có chức năng này")           
+
