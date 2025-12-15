@@ -5,9 +5,9 @@ from plyer import notification
 import os
 import pandas as pd
 
-khoa_api = ""
+khoa_api = "AIzaSyC8MBSm2nM7PF2afxzoXH3SwHtxHy_IdOE"
 
-# nói
+# text to speech
 
 def noi(x):
     from gtts import gTTS
@@ -30,7 +30,7 @@ def noi(x):
         time.sleep(0.5)
     pygame.mixer.quit()
 
-# nhận diện giọng nói
+# nhận diện giọng nói(speech to text)
 
 def nhangiong():
     import pyaudio
@@ -51,29 +51,58 @@ def nhangiong():
 
 # xét file lịch trình
 file="lichtrinh.xlsx"
-
+lan_nhac_gan_nhat = {}
 # nếu chưa có,tạo file mới
 if not os.path.exists(file):
     noi("Hiện chưa có lịch trình, tôi sẽ tạo file mới.")
     df = pd.DataFrame(columns=["tiêu đề", "thời gian"])
     df.to_excel(file, index=False)
     noi("Đã tạo xong")
-    
-# Danh sách sự kiện trong RAM
-def tai_sukien():
-    if not os.path.exists(file):
-        return []
-    df = pd.read_excel(file)
-    x = []
-    for _, row in df.iterrows():
-        try:
-            t = pd.to_datetime(row["thời gian"])
-            x.append({"tiêu đề": row["tiêu đề"], "thời gian": t})
-        except:
-            pass
-    return x
 
-cacsukien = tai_sukien()
+# ===== THÔNG BÁO =====
+def thong_bao(tieu_de, noi_dung):
+    notification.notify(
+        title=tieu_de,
+        message=noi_dung,
+        timeout=10
+    )
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {tieu_de}: {noi_dung}")
+
+# ===== KIỂM TRA & NHẮC =====
+def kiem_tra_lich():
+    df = pd.read_excel(file)
+
+    # Chuẩn hoá cột thời gian (AUTO nhận dạng mọi định dạng Excel)
+    df["thoi_gian"] = pd.to_datetime(
+        df["thời gian"],
+        errors="coerce",
+        infer_datetime_format=True
+    )
+
+    now = datetime.now()
+
+    for _, row in df.iterrows():
+        if pd.isna(row["thoi_gian"]):
+            continue
+
+        thoi_diem_goc = row["thoi_gian"]
+        bat_dau_nhac = thoi_diem_goc - timedelta(minutes=30)
+
+        # Chỉ nhắc trong khoảng cho phép
+        if not (bat_dau_nhac <= now < thoi_diem_goc):
+            continue
+
+        key = f"{thoi_diem_goc}_{row['tiêu đề']}"
+        lan_nhac_cuoi = lan_nhac_gan_nhat.get(key)
+
+        if lan_nhac_cuoi is None or now - lan_nhac_cuoi >= timedelta(minutes=5):
+            thong_bao(
+                f"⏰ SẮP ĐẾN GIỜ ({thoi_diem_goc.strftime('%H:%M')})",
+                f"{row['tiêu đề']}"
+            )
+            noi("gần đến giờ thực hiện lịch hôm nay rồi")
+            lan_nhac_gan_nhat[key] = now
+
 # xoá lịch
 def xoa():
     noi("Hãy nói tên lịch cần xoá")
@@ -87,10 +116,6 @@ def xoa():
         df = df[~ndxoa]
         df.to_excel(file, index=False)
 
-        # cập nhật RAM
-        global cacsukien
-        cacsukien = tai_sukien()
-
         noi("Đã xoá lịch trình")
     else:
         noi("Không tìm thấy lịch cần xóa")
@@ -98,32 +123,10 @@ def xoa():
 def hienthi():
     df=pd.read_excel("lichtrinh.xlsx")
     print(df)
-# chạy nền        
-def start_reminder():
-    import threading
-    def chaynen():
-        while True:
-            hientai = datetime.now()
-            for e in cacsukien:
-                delta = e["thời gian"] - hientai
 
-                # Nhắc trước 30 phút
-                if timedelta(minutes=29) < delta <= timedelta(minutes=30):
-                    noi(f"30 phút nữa đến: {e['tiêu đề']} — {e['thời gian']}")
-
-                # Đến giờ
-                if timedelta(seconds=0) <= delta <= timedelta(seconds=1):
-                    noi(f"ĐẾN GIỜ: {e['tiêu đề']} — {e['thời gian']}")
-
-            time.sleep(60)
-
-    thread = threading.Thread(target=chaynen, daemon=True)
-    thread.start()
-
-        
-txt = nhangiong()
+# Nhận dạng cảm xúc thông qua hình ảnh và giọng nói
+txt=nhangiong()
 noi("xin chào")
-start_reminder() 
 # kiểm tra yêu cầu
 while True:
     if "hello" or "xin chào" in txt:
@@ -140,11 +143,12 @@ while True:
             noi("Chào tạm biệt bạn")
             break
         elif 'hỏi đáp' in xt:
-            noi( "Đang khởi động hỏi đáp")
+            noi("Đang khởi động hỏi đáp")
         elif 'xem' in xt:
             noi("Đang in lịch trình")
             hienthi()
         else:
-
             noi("Xin lỗi,tôi không có chức năng này")           
-
+while True:
+    kiem_tra_lich()
+    time.sleep(60)
