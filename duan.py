@@ -5,7 +5,7 @@ from plyer import notification
 import os
 import pandas as pd
 
-khoa_api = "AIzaSyC8MBSm2nM7PF2afxzoXH3SwHtxHy_IdOE"
+khoa_api = " "
 
 # text to speech
 
@@ -151,4 +151,5 @@ while True:
             noi("Xin lỗi,tôi không có chức năng này")           
 while True:
     kiem_tra_lich()
+
     time.sleep(60)
