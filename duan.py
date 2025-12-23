@@ -5,7 +5,7 @@ from plyer import notification
 import os
 import pandas as pd
 
-os.environ["GOOGLE_API_KEY"] = "AIzaSyDyH0QmcvsduHoe9mNWCseV3hgF2yc_BdU"
+os.environ["GOOGLE_API_KEY"] = ""
 
 # text to speech
 
@@ -350,4 +350,5 @@ def chaycode():
                 noi("Xin lỗi,tôi không có chức năng này")           
 emotion()
 input("nhấn enter để mở lại chatbot")
+
 molai()
